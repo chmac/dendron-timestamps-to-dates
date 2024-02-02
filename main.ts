@@ -1,12 +1,16 @@
 import { cliffy, fs, path } from "./deps.ts";
 
-function timestampToDate(timestamp: string): string {
-  // const outputDate = new Date(parseInt(timestamp) * 1e3);
-  const outputDate = new Date(parseInt(timestamp));
-  const isoString = outputDate.toISOString();
-  // Trim off the last `.000Z` and replace with `+00:00`
-  const formattedString = isoString.slice(0, -5).concat("+00:00");
-  return formattedString;
+function timestampToDate(timestamp: string): string | undefined {
+  try {
+    // const outputDate = new Date(parseInt(timestamp) * 1e3);
+    const outputDate = new Date(parseInt(timestamp));
+    const isoString = outputDate.toISOString();
+    // Trim off the last `.000Z` and replace with `+00:00`
+    const formattedString = isoString.slice(0, -5).concat("+00:00");
+    return formattedString;
+  } catch (error) {
+    console.error("#fDVQ4w Date conversion error", error);
+  }
 }
 
 const createdRegEx = new RegExp("created: ([0-9]+)$", "m");
@@ -44,6 +48,14 @@ await new cliffy.Command()
 
       const createdString = timestampToDate(created);
       const updatedString = timestampToDate(updated);
+
+      if (
+        typeof createdString === "undefined" ||
+        typeof updatedString === "undefined"
+      ) {
+        console.error(`Failed on ${file.path}`);
+        continue;
+      }
 
       const createdYamlString = `created: ${createdString}`;
       const updatedYamlString = `updated: ${updatedString}`;
